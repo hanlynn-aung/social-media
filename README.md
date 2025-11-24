@@ -45,7 +45,7 @@ Best for client demos. Data is persisted.
     ```
 2.  **Start Environment:**
     ```bash
-    docker-compose up --build
+    docker compose up --build
     ```
 3.  **Access**: `http://localhost:8080`
     *   **App**: Runs on port 8080.
