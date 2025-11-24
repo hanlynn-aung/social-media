@@ -1,4 +1,4 @@
-d# Nightlife & Club Booking API
+# Nightlife & Club Booking API
 
 A comprehensive REST API for a Nightlife and Social Media application. This platform allows users to find bars/clubs, book tables, chat in groups, and see upcoming events.
 
