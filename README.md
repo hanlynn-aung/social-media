@@ -1,4 +1,4 @@
-d# Nightlife & Club Booking API
+# Nightlife & Club Booking API
 
 A comprehensive REST API for a Nightlife and Social Media application. This platform allows users to find bars/clubs, book tables, chat in groups, and see upcoming events.
 
@@ -45,7 +45,7 @@ Best for client demos. Data is persisted.
     ```
 2.  **Start Environment:**
     ```bash
-    docker-compose up --build
+    docker compose up --build
     ```
 3.  **Access**: `http://localhost:8080`
     *   **App**: Runs on port 8080.
