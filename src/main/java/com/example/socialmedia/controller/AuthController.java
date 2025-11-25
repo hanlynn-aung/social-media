@@ -1,12 +1,16 @@
 package com.example.socialmedia.controller;
 
+import com.example.socialmedia.annotation.RequireAdminRole;
 import com.example.socialmedia.dto.*;
 import com.example.socialmedia.model.User;
 import com.example.socialmedia.repository.UserRepository;
+import com.example.socialmedia.security.AuthorizationHelper;
 import com.example.socialmedia.security.JwtUtils;
 import com.example.socialmedia.security.UserDetailsImpl;
+import com.example.socialmedia.util.ResponseUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,6 +39,9 @@ public class AuthController {
     @Autowired
     JwtUtils jwtUtils;
 
+    @Autowired
+    AuthorizationHelper authorizationHelper;
+
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         // Handle Phone Login specifically if needed, but usually authenticationManager can handle it if customized
@@ -61,11 +68,19 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
         if (userRepository.findByUsername(signUpRequest.getUsername()).isPresent()) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ResponseUtil.buildErrorResponse("Username is already taken"));
         }
 
         if (userRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ResponseUtil.buildErrorResponse("Email is already in use"));
+        }
+
+        // Validate password strength
+        if (signUpRequest.getPassword() == null || signUpRequest.getPassword().length() < 6) {
+            return ResponseEntity.badRequest()
+                    .body(ResponseUtil.buildErrorResponse("Password must be at least 6 characters"));
         }
 
         // Create new user's account
@@ -75,18 +90,28 @@ public class AuthController {
         user.setPassword(encoder.encode(signUpRequest.getPassword()));
         user.setPhoneNumber(signUpRequest.getPhoneNumber());
         
-        // Set Role
-        if (signUpRequest.getRole() != null && signUpRequest.getRole().equalsIgnoreCase("admin")) {
-             user.setRole(User.Role.ADMIN);
-        } else if (signUpRequest.getRole() != null && signUpRequest.getRole().equalsIgnoreCase("shop_admin")) {
-             user.setRole(User.Role.SHOP_ADMIN);
+        // Set Role - only ADMIN can assign admin/shop_admin roles
+        if (signUpRequest.getRole() != null && 
+            (signUpRequest.getRole().equalsIgnoreCase("admin") || signUpRequest.getRole().equalsIgnoreCase("shop_admin"))) {
+            
+            // Check if requester is admin
+            if (!authorizationHelper.isAdmin()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ResponseUtil.buildErrorResponse("Only admins can assign admin roles"));
+            }
+            
+            if (signUpRequest.getRole().equalsIgnoreCase("admin")) {
+                user.setRole(User.Role.ADMIN);
+            } else {
+                user.setRole(User.Role.SHOP_ADMIN);
+            }
         } else {
-             user.setRole(User.Role.USER);
+            user.setRole(User.Role.USER);
         }
 
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(ResponseUtil.buildSuccessResponse("User registered successfully"));
     }
     
     @PostMapping("/social-login")
@@ -154,9 +179,10 @@ public class AuthController {
     
     @PostMapping("/reset-password-request")
     public ResponseEntity<?> resetPasswordRequest(@RequestParam String email) {
-        // 1. Check if user exists
+        // Security: Avoid revealing whether email exists or not
         if (userRepository.findByEmail(email).isEmpty()) {
-            return ResponseEntity.badRequest().body("Error: Email not found.");
+            // Still return OK to prevent email enumeration
+            return ResponseEntity.ok(ResponseUtil.buildSuccessResponse("If email exists, password reset link has been sent"));
         }
         
         // 2. Generate reset token (uuid)
@@ -164,6 +190,6 @@ public class AuthController {
         String resetToken = UUID.randomUUID().toString();
         System.out.println("Sending password reset email to " + email + " with token: " + resetToken);
         
-        return ResponseEntity.ok("Password reset link sent to email!");
+        return ResponseEntity.ok(ResponseUtil.buildSuccessResponse("If email exists, password reset link has been sent"));
     }
 }

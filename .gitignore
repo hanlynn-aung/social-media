@@ -1,0 +1,48 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.backup
+*.jar
+*.war
+*.ear
+*.zip
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+*.iws
+*.ipr
+
+# Environment & Configuration
+.env
+.env.local
+.env.*.local
+application-local.properties
+application-dev.properties
+
+# Uploads & Temporary Files
+uploads/
+tmp/
+temp/
+*.log
+logs/
+
+# Java
+*.class
+*.classpath
+.gradle/
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+.project
+.settings/
+.classpath

@@ -5,18 +5,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reviews")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Review {
+public class Review extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +40,5 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+
 }

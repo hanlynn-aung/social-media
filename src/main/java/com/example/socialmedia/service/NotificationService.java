@@ -25,7 +25,7 @@ public class NotificationService {
     }
 
     public List<Notification> getUserNotifications(Long userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return notificationRepository.findByUserIdOrderByCreatedDateDesc(userId);
     }
 
     public void createNotificationForUser(User user, String message, Notification.NotificationType type) {

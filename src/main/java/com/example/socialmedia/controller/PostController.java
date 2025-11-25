@@ -1,7 +1,10 @@
 package com.example.socialmedia.controller;
 
+import com.example.socialmedia.annotation.RequireShopAdminRole;
 import com.example.socialmedia.model.Post;
+import com.example.socialmedia.security.AuthorizationHelper;
 import com.example.socialmedia.service.PostService;
+import com.example.socialmedia.util.ResponseUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,43 +12,65 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
 
     private final PostService postService;
+    private final AuthorizationHelper authorizationHelper;
 
     @Autowired
-    public PostController(PostService postService) {
+    public PostController(PostService postService, AuthorizationHelper authorizationHelper) {
         this.postService = postService;
+        this.authorizationHelper = authorizationHelper;
     }
 
     @GetMapping
-    public List<Post> getAllPosts() {
-        return postService.getAllPosts();
+    public ResponseEntity<?> getAllPosts() {
+        try {
+            List<Post> posts = postService.getAllPosts();
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ResponseUtil.buildErrorResponse(e.getMessage()));
+        }
     }
 
     @GetMapping("/shop/{shopId}")
-    public List<Post> getPostsByShopId(@PathVariable Long shopId) {
-        return postService.getPostsByShopId(shopId);
+    public ResponseEntity<?> getPostsByShopId(@PathVariable Long shopId) {
+        try {
+            List<Post> posts = postService.getPostsByShopId(shopId);
+            return ResponseEntity.ok(posts);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ResponseUtil.buildErrorResponse(e.getMessage()));
+        }
     }
 
     @PostMapping("/shop/{shopId}")
-    public Post createPost(@PathVariable Long shopId, @Valid @RequestBody Post post) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String username = userDetails.getUsername();
-        
-        return postService.createPost(shopId, post, username);
+    @RequireShopAdminRole
+    public ResponseEntity<?> createPost(@PathVariable Long shopId, @Valid @RequestBody Post post) {
+        try {
+            String username = authorizationHelper.getCurrentUsername()
+                    .orElseThrow(() -> new IllegalStateException("Current user not found"));
+            
+            Post created = postService.createPost(shopId, post, username);
+            return ResponseEntity.ok(created);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ResponseUtil.buildErrorResponse(e.getMessage()));
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
-        return ResponseEntity.ok().build();
+    @RequireShopAdminRole
+    public ResponseEntity<?> deletePost(@PathVariable Long id) {
+        try {
+            postService.deletePost(id);
+            return ResponseEntity.ok(ResponseUtil.buildSuccessResponse("Post deleted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ResponseUtil.buildErrorResponse(e.getMessage()));
+        }
     }
 }

@@ -3,18 +3,19 @@ package com.example.socialmedia.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Notification {
+public class Notification extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,8 +33,7 @@ public class Notification {
 
     private boolean isRead = false;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+
 
     public enum NotificationType {
         SHOP_ANNOUNCEMENT,

@@ -3,18 +3,19 @@ package com.example.socialmedia.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reservations")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Reservation {
+public class Reservation extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +40,7 @@ public class Reservation {
     
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
-    
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-    
+
     public enum ReservationStatus {
         PENDING,
         CONFIRMED,
