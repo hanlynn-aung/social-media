@@ -27,8 +27,10 @@ public class Message {
     @NotBlank
     private String content;
     
+    @Builder.Default
     private MessageStatus status = MessageStatus.VISIBLE;
 
+    @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();
     
     public enum MessageStatus {

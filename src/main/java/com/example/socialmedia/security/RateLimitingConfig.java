@@ -49,28 +49,21 @@ public class RateLimitingConfig {
      * Create bucket based on user role
      */
     private Bucket createBucket(String role) {
-        int limit = ANONYMOUS_RATE_LIMIT;
+       int limit = ANONYMOUS_RATE_LIMIT;
 
-        if (role != null) {
-            switch (role) {
-                case "ADMIN":
-                    limit = ADMIN_RATE_LIMIT;
-                    break;
-                case "SHOP_ADMIN":
-                    limit = SHOP_ADMIN_RATE_LIMIT;
-                    break;
-                case "USER":
-                    limit = USER_RATE_LIMIT;
-                    break;
-                default:
-                    limit = ANONYMOUS_RATE_LIMIT;
-            }
-        }
+       if (role != null) {
+           limit = switch (role) {
+               case "ADMIN" -> ADMIN_RATE_LIMIT;
+               case "SHOP_ADMIN" -> SHOP_ADMIN_RATE_LIMIT;
+               case "USER" -> USER_RATE_LIMIT;
+               default -> ANONYMOUS_RATE_LIMIT;
+           };
+       }
 
-        Bandwidth bandwidth = Bandwidth.classic(limit, Refill.intervally(limit, Duration.ofMinutes(1)));
-        return Bucket4j.builder()
-                .addLimit(bandwidth)
-                .build();
+       Bandwidth bandwidth = Bandwidth.classic(limit, Refill.intervally(limit, Duration.ofMinutes(1)));
+       return Bucket4j.builder()
+               .addLimit(bandwidth)
+               .build();
     }
 
     /**
@@ -78,7 +71,7 @@ public class RateLimitingConfig {
      */
     private Bucket createEndpointBucket(String endpoint) {
         int limit;
-
+        
         if (endpoint.contains("/uploads")) {
             limit = UPLOAD_RATE_LIMIT;
         } else if (endpoint.contains("/auth")) {
@@ -122,19 +115,15 @@ public class RateLimitingConfig {
     }
 
     private int getTokenLimit(String role) {
-        if (role != null) {
-            switch (role) {
-                case "ADMIN":
-                    return ADMIN_RATE_LIMIT;
-                case "SHOP_ADMIN":
-                    return SHOP_ADMIN_RATE_LIMIT;
-                case "USER":
-                    return USER_RATE_LIMIT;
-                default:
-                    return ANONYMOUS_RATE_LIMIT;
-            }
+        if (role == null) {
+            return ANONYMOUS_RATE_LIMIT;
         }
-        return ANONYMOUS_RATE_LIMIT;
+        return switch (role) {
+            case "ADMIN" -> ADMIN_RATE_LIMIT;
+            case "SHOP_ADMIN" -> SHOP_ADMIN_RATE_LIMIT;
+            case "USER" -> USER_RATE_LIMIT;
+            default -> ANONYMOUS_RATE_LIMIT;
+        };
     }
 
     /**

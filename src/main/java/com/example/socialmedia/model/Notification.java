@@ -2,12 +2,7 @@ package com.example.socialmedia.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "notifications")
@@ -15,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Notification extends BaseEntity {
 
     @Id
@@ -31,6 +27,7 @@ public class Notification extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
+    @Builder.Default
     private boolean isRead = false;
 
 

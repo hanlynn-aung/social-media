@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Reservation extends BaseEntity {
 
     @Id
@@ -36,9 +38,11 @@ public class Reservation extends BaseEntity {
     private Integer numberOfGuests;
     
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private ReservationStatus status = ReservationStatus.PENDING;
     
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     public enum ReservationStatus {

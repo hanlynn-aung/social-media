@@ -3,12 +3,7 @@ package com.example.socialmedia.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "posts")
@@ -16,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Post extends BaseEntity {
 
     @Id
@@ -33,6 +29,7 @@ public class Post extends BaseEntity {
     
     // Type of post: GENERAL, EVENT, PROMOTION
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private PostType type = PostType.GENERAL;
     
     public enum PostType {
